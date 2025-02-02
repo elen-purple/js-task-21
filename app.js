@@ -64,16 +64,17 @@ const galleryItems = [
   },
 ];
 
-const galleryList = document.querySelector(".js-gallery")
+const galleryList = document.querySelector(".js-gallery");
 const lightbox = document.querySelector(".js-lightbox");
-const closeBtn = document.querySelector(`[data-action="close-lightbox"]`)
+const overlay = document.querySelector(".lightbox__overlay");
+const closeBtn = document.querySelector(`[data-action="close-lightbox"]`);
 const image = document.querySelector(".lightbox__image");
 
 galleryItems.forEach((item) => {
-    const { preview, original, description } = item;
-    galleryList.insertAdjacentHTML(
-      "beforeend",
-      `<li class="gallery__item">
+  const { preview, original, description } = item;
+  galleryList.insertAdjacentHTML(
+    "beforeend",
+    `<li class="gallery__item">
             <img
               class="gallery__image"
               src="${preview}"
@@ -81,18 +82,48 @@ galleryItems.forEach((item) => {
               alt="${description}"
             />
         </li>`
-    );
-})
+  );
+});
 
 galleryList.addEventListener("click", (e) => {
-    if (e.target === galleryList) {
-        return;
-    }
-    image.src = e.target.dataset.source;
-    lightbox.classList.add("is-open")
-})
+  if (e.target === galleryList) {
+    return;
+  }
+  image.src = e.target.dataset.source;
+  image.alt = e.target.alt;
+  lightbox.classList.add("is-open");
+});
 
-closeBtn.addEventListener("click", () => {
-    lightbox.classList.remove("is-open");
-    image.src = ""
-})
+closeBtn.addEventListener("click", toggleLightbox);
+overlay.addEventListener("click", toggleLightbox);
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Escape") {
+    toggleLightbox();
+  }
+  if (lightbox.classList.contains("is-open")) {
+    if (e.code === "ArrowRight") {
+      const currentIndex = galleryItems.indexOf(
+        galleryItems.find((item) => item.description === image.alt)
+      );
+      if (currentIndex + 1 < galleryItems.length) {
+        image.src = galleryItems[currentIndex + 1].original;
+        image.alt = galleryItems[currentIndex + 1].description;
+      }
+    }
+    if (e.code === "ArrowLeft") {
+      const currentIndex = galleryItems.indexOf(
+        galleryItems.find((item) => item.description === image.alt)
+      );
+      if (currentIndex > 0) {
+        image.src = galleryItems[currentIndex - 1].original;
+        image.alt = galleryItems[currentIndex - 1].description;
+      }
+    }
+  }
+});
+
+function toggleLightbox() {
+  lightbox.classList.remove("is-open");
+  image.src = "";
+  image.alt = "";
+}
